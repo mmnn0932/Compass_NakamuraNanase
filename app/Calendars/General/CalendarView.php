@@ -15,7 +15,8 @@ class CalendarView{
     return $this->carbon->format('Y年n月');
   }
 
-  function render(){
+  public function render()
+{
     $html = [];
     $html[] = '<div class="calendar text-center">';
     $html[] = '<table class="table">';
@@ -31,66 +32,95 @@ class CalendarView{
     $html[] = '</tr>';
     $html[] = '</thead>';
     $html[] = '<tbody>';
+
     $weeks = $this->getWeeks();
-    foreach($weeks as $week){
-      $html[] = '<tr class="'.$week->getClassName().'">';
 
-      $days = $week->getDays();
-      foreach($days as $day){
-        $startDay = $this->carbon->copy()->format("Y-m-01");
-        $toDay = $this->carbon->copy()->format("Y-m-d");
+    foreach ($weeks as $week) {
+        $html[] = '<tr class="' . $week->getClassName() . '">';
 
-        if($startDay <= $day->everyDay() && $toDay >= $day->everyDay()){
-          $html[] = '<td class="calendar-td">';
-        }else{
-          $html[] = '<td class="calendar-td '.$day->getClassName().'">';
+        $days = $week->getDays();
+        foreach ($days as $day) {
+            // その日の文字列とCarbon
+            $dayDateStr = $day->everyDay();                 // 例: "2025-09-03"
+            $dayDate    = \Carbon\Carbon::parse($dayDateStr);
+            $today      = \Carbon\Carbon::today(config('app.timezone'));
+
+            // 過去日かどうか（今日より前なら過去）
+            $isPast = $dayDate->lt($today);
+
+            // <td> 開始（過去日はグレー）
+            if ($isPast) {
+                $html[] = '<td class="calendar-td past-day">';
+            } else {
+                $html[] = '<td class="calendar-td ' . $day->getClassName() . '">';
+            }
+
+            // 日付数字など（既存の day->render()）
+            $html[] = $day->render();
+
+            // 自分の予約の有無（注意：配列は文字列日付で比較）
+            $hasMyReserve = in_array($dayDateStr, $day->authReserveDay(), true);
+
+            if ($hasMyReserve) {
+                // 予約部を取得（こちらもキーは文字列日付）
+                $reserve = $day->authReserveDate($dayDateStr)->first();
+                $reservePart = $reserve->setting_part ?? null;
+
+                if ($reservePart === 1)      $reserveLabel = 'リモ1部';
+                elseif ($reservePart === 2)  $reserveLabel = 'リモ2部';
+                elseif ($reservePart === 3)  $reserveLabel = 'リモ3部';
+                else                         $reserveLabel = 'リモ';
+
+                if ($isPast) {
+                    // 過去日は表示のみ
+                    $html[] = '<p class="m-auto p-0 w-75 text-muted" style="font-size:12px">' . $reserveLabel . '</p>';
+                    $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
+                } else {
+                    // 当日・未来はキャンセル（モーダル起動ボタン）
+                    $html[] = '<button type="button"
+                                    class="btn btn-danger p-0 w-75 js-open-cancel"
+                                    data-date="' . e($reserve->setting_reserve) . '"
+                                    data-part="' . e($reserve->setting_part) . '"
+                                    style="font-size:12px">' . e($reserveLabel) . '</button>';
+                    $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
+                }
+            } else {
+                if ($isPast) {
+                    // 過去日・未予約 → 受付終了
+                    $html[] = '<p class="m-auto p-0 w-75 text-muted" style="font-size:12px">受付終了</p>';
+                    $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
+                } else {
+                    // 当日以降・未予約 → プルダウン（既存の day->selectPart を使用）
+                    $html[] = $day->selectPart($dayDateStr);
+                }
+            }
+
+            // 日付の小さな表示など
+            $html[] = $day->getDate();
+            $html[] = '</td>';
         }
-        $html[] = $day->render();
 
-        if(in_array($day->everyDay(), $day->authReserveDay())){
-          $reservePart = $day->authReserveDate($day->everyDay())->first()->setting_part;
-          if($reservePart == 1){
-            $reservePart = "リモ1部";
-          }else if($reservePart == 2){
-            $reservePart = "リモ2部";
-          }else if($reservePart == 3){
-            $reservePart = "リモ3部";
-          }
-          if($startDay <= $day->everyDay() && $toDay >= $day->everyDay()){
-            $html[] = '<p class="m-auto p-0 w-75" style="font-size:12px"></p>';
-            $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
-          }else{
-            $html[] = '<button type="button"
-           class="btn btn-danger p-0 w-75 js-open-cancel"
-           data-date="'. $day->authReserveDate($day->everyDay())->first()->setting_reserve .'"
-           data-part="'. $day->authReserveDate($day->everyDay())->first()->setting_part .'"
-           style="font-size:12px">'
-           . $reservePart .
-           '</button>';
-            $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
-          }
-        }else{
-          $html[] = $day->selectPart($day->everyDay());
-        }
-        $html[] = $day->getDate();
-        $html[] = '</td>';
-      }
-      $html[] = '</tr>';
+        $html[] = '</tr>';
     }
+
     $html[] = '</tbody>';
     $html[] = '</table>';
     $html[] = '</div>';
+
+    // 予約登録フォーム
     $html[] = '<form action="/reserve/calendar" method="post" id="reserveParts">'
-        . csrf_field()
-        . '</form>';
+            . csrf_field()
+            . '</form>';
+
+    // 予約取消フォーム（モーダルから値を入れて submit）
     $html[] = '<form action="/delete/calendar" method="post" id="deleteParts">'
-        . csrf_field()
-        . '<input type="hidden" name="delete_date" id="delete_date">'
-        . '<input type="hidden" name="delete_part" id="delete_part">'
-        . '</form>';
+            . csrf_field()
+            . '<input type="hidden" name="delete_date" id="delete_date">'
+            . '<input type="hidden" name="delete_part" id="delete_part">'
+            . '</form>';
 
     return implode('', $html);
-  }
+}
 
   protected function getWeeks(){
     $weeks = [];

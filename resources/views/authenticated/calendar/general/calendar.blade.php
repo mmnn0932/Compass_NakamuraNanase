@@ -80,3 +80,9 @@ $(document).on('click', '.js-cancel-submit', function(){
   });
 });
 </script>
+
+<style>
+  .past-day {
+    background: #eeeeee;
+  }
+</style>

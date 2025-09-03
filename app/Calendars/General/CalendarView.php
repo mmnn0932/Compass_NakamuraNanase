@@ -60,7 +60,13 @@ class CalendarView{
             $html[] = '<p class="m-auto p-0 w-75" style="font-size:12px"></p>';
             $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
           }else{
-            $html[] = '<button type="submit" class="btn btn-danger p-0 w-75" name="delete_date" style="font-size:12px" value="'. $day->authReserveDate($day->everyDay())->first()->setting_reserve .'">'. $reservePart .'</button>';
+            $html[] = '<button type="button"
+           class="btn btn-danger p-0 w-75 js-open-cancel"
+           data-date="'. $day->authReserveDate($day->everyDay())->first()->setting_reserve .'"
+           data-part="'. $day->authReserveDate($day->everyDay())->first()->setting_part .'"
+           style="font-size:12px">'
+           . $reservePart .
+           '</button>';
             $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
           }
         }else{
@@ -74,8 +80,14 @@ class CalendarView{
     $html[] = '</tbody>';
     $html[] = '</table>';
     $html[] = '</div>';
-    $html[] = '<form action="/reserve/calendar" method="post" id="reserveParts">'.csrf_field().'</form>';
-    $html[] = '<form action="/delete/calendar" method="post" id="deleteParts">'.csrf_field().'</form>';
+    $html[] = '<form action="/reserve/calendar" method="post" id="reserveParts">'
+        . csrf_field()
+        . '</form>';
+    $html[] = '<form action="/delete/calendar" method="post" id="deleteParts">'
+        . csrf_field()
+        . '<input type="hidden" name="delete_date" id="delete_date">'
+        . '<input type="hidden" name="delete_part" id="delete_part">'
+        . '</form>';
 
     return implode('', $html);
   }

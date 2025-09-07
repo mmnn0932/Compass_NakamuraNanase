@@ -35,13 +35,36 @@
     <div class="category_area mt-5 p-5">
       <div class="">
         <p class="m-0">メインカテゴリー</p>
+        @if($errors->first('main_category_name'))
+        <span class="error_message">{{ $errors->first('main_category_name') }}</span>
+        @endif
         <input type="text" class="w-100" name="main_category_name" form="mainCategoryRequest">
         <input type="submit" value="追加" class="w-100 btn btn-primary p-0" form="mainCategoryRequest">
-      </div>
-      <!-- サブカテゴリー追加 -->
       <form action="{{ route('main.category.create') }}" method="post" id="mainCategoryRequest">{{ csrf_field() }}</form>
+
+    <!-- サブカテゴリー追加 -->
     </div>
+    <div class="mt-5">
+    <p class="m-0">サブカテゴリー</p>
+        @if($errors->first('sub_category_name'))
+          <span class="error_message">{{ $errors->first('sub_category_name') }}</span>
+        @endif
+        <select class="w-100" name="main_category_id" form="subCategoryRequest">
+          <option value="">メインカテゴリーを選択</option>
+          @foreach($main_categories as $main_category)
+          <option value="{{ $main_category->id }}" {{ old('main_category_id') == $main_category->id ? 'selected' : '' }}>
+            {{ $main_category->main_category }}
+          </option>
+        @endforeach
+        </select>
+
+        <input type="text" class="w-100" name="sub_category_name" form="subCategoryRequest" value="{{ old('sub_category_name') }}">
+        <input type="submit" value="追加" class="w-100 btn btn-primary p-0" form="subCategoryRequest">
+      <form action="{{ route('sub.category.create') }}" method="post" id="subCategoryRequest">
+        {{ csrf_field() }}
+      </form>
+      </div>
   </div>
-  @endcan
 </div>
+@endcan
 </x-sidebar>

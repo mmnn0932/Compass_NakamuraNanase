@@ -44,7 +44,7 @@ class PostsController extends Controller
     }
 
     public function postInput(){
-        $main_categories = MainCategory::get();
+        $main_categories = MainCategory::with('subCategories')->get();
         return view('authenticated.bulletinboard.post_create', compact('main_categories'));
     }
 
@@ -69,8 +69,66 @@ class PostsController extends Controller
         Post::findOrFail($id)->delete();
         return redirect()->route('post.show');
     }
-    public function mainCategoryCreate(Request $request){
+    public function mainCategoryCreate(Request $request)
+    {
+        $request->validate(
+        [
+            'main_category_name' => [
+                'required',
+                'string',
+                'max:100',
+                'unique:main_categories,main_category',
+            ],
+        ],
+        [
+            'main_category_name.required' => 'メインカテゴリー名は必須です。',
+            'main_category_name.string'   => 'メインカテゴリー名は文字で入力してください。',
+            'main_category_name.max'      => 'メインカテゴリー名は100文字以内で入力してください。',
+            'main_category_name.unique'   => '同じ名前のメインカテゴリーは登録できません。',
+        ],
+        [
+            'main_category_name' => 'メインカテゴリー名',
+        ]
+    );
         MainCategory::create(['main_category' => $request->main_category_name]);
+
+        return redirect()->route('post.input');
+    }
+
+    public function subCategoryCreate(Request $request)
+    {
+        $request->validate(
+        [
+            'main_category_id' => [
+                'required',
+                'exists:main_categories,id'
+            ],
+            'sub_category_name' => [
+                'required',
+                'string',
+                'max:100',
+                'unique:sub_categories,sub_category'
+            ],
+        ],
+        [
+            'main_category_id.required' => 'メインカテゴリーは必須です。',
+            'main_category_id.exists'   => '選択したメインカテゴリーが存在しません。',
+
+            'sub_category_name.required' => 'サブカテゴリー名は必須です。',
+            'sub_category_name.string'   => 'サブカテゴリー名は文字で入力してください。',
+            'sub_category_name.max'      => 'サブカテゴリー名は100文字以内で入力してください。',
+            'sub_category_name.unique'   => '同じ名前のサブカテゴリーは登録できません。',
+        ],
+        [
+            'main_category_id'  => 'メインカテゴリー',
+            'sub_category_name' => 'サブカテゴリー名',
+        ]
+    );
+
+        SubCategory::create([
+        'main_category_id' => $request->main_category_id,
+        'sub_category'     => $request->sub_category_name,]);
+
         return redirect()->route('post.input');
     }
 

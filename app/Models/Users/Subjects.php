@@ -16,6 +16,7 @@ class Subjects extends Model
     ];
 
     public function users(){
-        return;                  //sa// リレーションの定義
+        return;
+        //リレーションの定義
     }
 }

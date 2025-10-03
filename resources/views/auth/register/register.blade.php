@@ -8,12 +8,14 @@
               <label class="d-block m-0" style="font-size:13px">姓</label>
               <div class="border-bottom border-primary" style="width:140px;">
                 <input type="text" style="width:140px;" class="border-0 over_name" name="over_name">
+                @error('over_name') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
             </div>
             <div class="" style="width:140px">
               <label class=" d-block m-0" style="font-size:13px">名</label>
               <div class="border-bottom border-primary" style="width:140px;">
                 <input type="text" style="width:140px;" class="border-0 under_name" name="under_name">
+                @error('under_name') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
             </div>
           </div>
@@ -22,12 +24,14 @@
               <label class="d-block m-0" style="font-size:13px">セイ</label>
               <div class="border-bottom border-primary" style="width:140px;">
                 <input type="text" style="width:140px;" class="border-0 over_name_kana" name="over_name_kana">
+                @error('over_name_kana') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
             </div>
             <div class="" style="width:140px">
               <label class="d-block m-0" style="font-size:13px">メイ</label>
               <div class="border-bottom border-primary" style="width:140px;">
                 <input type="text" style="width:140px;" class="border-0 under_name_kana" name="under_name_kana">
+                @error('under_name_kana') <small class="text-danger">{{ $message }}</small> @enderror
               </div>
             </div>
           </div>
@@ -35,6 +39,7 @@
             <label class="m-0 d-block" style="font-size:13px">メールアドレス</label>
             <div class="border-bottom border-primary">
               <input type="mail" class="w-100 border-0 mail_address" name="mail_address">
+              @error('mail_address') <small class="text-danger">{{ $message }}</small> @enderror
             </div>
           </div>
         </div>
@@ -45,6 +50,7 @@
           <label style="font-size:13px">女性</label>
           <input type="radio" name="sex" class="sex" value="3">
           <label style="font-size:13px">その他</label>
+          @error('sex')  <small class="text-danger d-block">{{ $message }}</small> @enderror
         </div>
         <div class="mt-3">
           <label class="d-block m-0 aa" style="font-size:13px">生年月日</label>
@@ -129,6 +135,18 @@
             <option value="31">31</option>
           </select>
           <label style="font-size:13px">日</label>
+          @php
+  $birthErrs = collect([
+      $errors->first('old_year'),
+      $errors->first('old_month'),
+      $errors->first('old_day'),
+      $errors->first('birth_day'),
+  ])->unique();
+@endphp
+
+@foreach($birthErrs as $msg)
+  <small class="text-danger d-block">{{ $msg }}</small>
+@endforeach
         </div>
         <div class="mt-3">
           <label class="d-block m-0" style="font-size:13px">役職</label>
@@ -141,6 +159,7 @@
           <input type="radio" name="role" class="other_role role" value="4">
           <label style="font-size:13px" class="other_role">生徒</label>
         </div>
+        @error('role') <small class="text-danger d-block">{{ $message }}</small> @enderror
         <div class="select_teacher d-none">
           <label class="d-block m-0" style="font-size:13px">選択科目</label>
           @foreach($subjects as $subject)
@@ -154,16 +173,18 @@
           <label class="d-block m-0" style="font-size:13px">パスワード</label>
           <div class="border-bottom border-primary">
             <input type="password" class="border-0 w-100 password" name="password">
+            @error('password') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
         </div>
         <div class="mt-3">
           <label class="d-block m-0" style="font-size:13px">確認用パスワード</label>
           <div class="border-bottom border-primary">
             <input type="password" class="border-0 w-100 password_confirmation" name="password_confirmation">
+            @error('password_confirmation') <small class="text-danger">{{ $message }}</small> @enderror
           </div>
         </div>
         <div class="mt-5 text-right">
-          <input type="submit" class="btn btn-primary register_btn" disabled value="新規登録" onclick="return confirm('登録してよろしいですか？')">
+          <input type="submit" class="btn btn-primary register_btn" value="新規登録" onclick="return confirm('登録してよろしいですか？')">
         </div>
         <div class="text-center">
           <a href="{{ route('loginView') }}">ログイン</a>
@@ -174,5 +195,5 @@
   </form>
   </div>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-  <script src="{{ asset('js/register.js') }}" rel="stylesheet"></script>
+  <!-- <script src="{{ asset('js/register.js') }}" rel="stylesheet"></script> -->
 </x-guest-layout>

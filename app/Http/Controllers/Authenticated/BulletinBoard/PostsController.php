@@ -12,6 +12,8 @@ use App\Models\Posts\Like;
 use App\Models\Users\User;
 use App\Http\Requests\BulletinBoard\PostFormRequest;
 use Auth;
+use App\Http\Requests\Admin\MainCategoryRequest;
+use App\Http\Requests\Admin\SubCategoryRequest;
 
 class PostsController extends Controller
 {
@@ -44,16 +46,18 @@ class PostsController extends Controller
     }
 
     public function postInput(){
-        $main_categories = MainCategory::get();
+        $main_categories = MainCategory::with('subCategories')->get();
         return view('authenticated.bulletinboard.post_create', compact('main_categories'));
     }
 
     public function postCreate(PostFormRequest $request){
+        $data = $request->validated();
         $post = Post::create([
             'user_id' => Auth::id(),
-            'post_title' => $request->post_title,
-            'post' => $request->post_body
+            'post_title' => $data['post_title'],
+            'post'       => $data['post_body'],
         ]);
+        $post->subCategories()->attach($data['post_category_id']);
         return redirect()->route('post.show');
     }
 
@@ -69,8 +73,20 @@ class PostsController extends Controller
         Post::findOrFail($id)->delete();
         return redirect()->route('post.show');
     }
-    public function mainCategoryCreate(Request $request){
-        MainCategory::create(['main_category' => $request->main_category_name]);
+    public function mainCategoryCreate(MainCategoryRequest $request){
+    MainCategory::create([
+        'main_category' => $request->validated()['main_category_name'],
+    ]);
+    return redirect()->route('post.input');
+    }
+
+    public function subCategoryCreate(SubCategoryRequest $request)
+    {
+        $data = $request->validated();
+        SubCategory::create([
+            'main_category_id' => $data['main_category_id'],
+            'sub_category'     => $data['sub_category_name'],
+        ]);
         return redirect()->route('post.input');
     }
 

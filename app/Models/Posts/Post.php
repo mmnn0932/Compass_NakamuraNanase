@@ -3,6 +3,8 @@
 namespace App\Models\Posts;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Categories\SubCategory;
+use App\Models\Posts\Like;
 
 class Post extends Model
 {
@@ -21,6 +23,10 @@ class Post extends Model
 
     public function postComments(){
         return $this->hasMany('App\Models\Posts\PostComment');
+    }
+
+    public function likes(){
+    return $this->hasMany(Like::class, 'like_post_id');
     }
 
     public function subCategories(){

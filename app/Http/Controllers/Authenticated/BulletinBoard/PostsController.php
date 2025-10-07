@@ -14,6 +14,7 @@ use App\Http\Requests\BulletinBoard\PostFormRequest;
 use Auth;
 use App\Http\Requests\Admin\MainCategoryRequest;
 use App\Http\Requests\Admin\SubCategoryRequest;
+use App\Http\Requests\CommentFormRequest;
 
 class PostsController extends Controller
 {
@@ -92,11 +93,12 @@ class PostsController extends Controller
         return redirect()->route('post.input');
     }
 
-    public function commentCreate(Request $request){
+    public function commentCreate(CommentFormRequest $request){
+        $data = $request->validated();
         PostComment::create([
             'post_id' => $request->post_id,
             'user_id' => Auth::id(),
-            'comment' => $request->comment
+            'comment' => $data['comment']
         ]);
         return redirect()->route('post.detail', ['id' => $request->post_id]);
     }

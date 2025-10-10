@@ -7,6 +7,16 @@
           <div>
           </div>
           @if(Auth::id() === $post->user_id)
+          @if ($errors->has('post_title') || $errors->has('post_body'))
+            <div class="error_message">
+              @error('post_title')
+                <div class="">{{ $message }}</div>
+              @enderror
+              @error('post_body')
+                <div class="">{{ $message }}</div>
+              @enderror
+            </div>
+          @endif
           <div>
             <span class="edit-modal-open" post_title="{{ $post->post_title }}" post_body="{{ $post->post }}" post_id="{{ $post->id }}">編集</span>
             <a href="{{ route('post.delete', ['id' => $post->id]) }}"
@@ -53,7 +63,7 @@
         <input type="hidden" name="post_id" form="commentRequest" value="{{ $post->id }}">
         <input type="submit" class="btn btn-primary" form="commentRequest" value="投稿">
         @error('comment')
-        <small class="text-danger">{{ $message }}</small>
+        <span class="error_message">{{ $message }}</span>
         @enderror
         <form action="{{ route('comment.create') }}" method="post" id="commentRequest">{{ csrf_field() }}</form>
       </div>
@@ -66,14 +76,14 @@
     <form action="{{ route('post.edit') }}" method="post">
       <div class="w-100">
         <div class="modal-inner-title w-50 m-auto">
-          <input type="text" name="post_title" placeholder="タイトル" class="w-100">
+          <input type="text" name="post_title" placeholder="タイトル" class="w-100" value="{{ old('post_title', $post->post_title) }}">
         </div>
         <div class="modal-inner-body w-50 m-auto pt-3 pb-3">
-          <textarea placeholder="投稿内容" name="post_body" class="w-100"></textarea>
+          <textarea placeholder="投稿内容" name="post_body" class="w-100">{{ old('post_body', $post->post) }}</textarea>
         </div>
         <div class="w-50 m-auto edit-modal-btn d-flex">
           <a class="js-modal-close btn btn-danger d-inline-block" href="">閉じる</a>
-          <input type="hidden" class="edit-modal-hidden" name="post_id" value="">
+          <input type="hidden" class="edit-modal-hidden" name="post_id" value="{{ $post->id }}">
           <input type="submit" class="btn btn-primary d-block" value="編集">
         </div>
       </div>

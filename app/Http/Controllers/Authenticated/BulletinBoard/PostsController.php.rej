@@ -1,0 +1,13 @@
+diff a/app/Http/Controllers/Authenticated/BulletinBoard/PostsController.php b/app/Http/Controllers/Authenticated/BulletinBoard/PostsController.php	(rejected hunks)
+@@ -164,4 +164,11 @@
+ 
+         return response()->json();
+     }
++
++    public function postDetail($id)
++{
++    $post = Post::with(['user', 'postComments'])->findOrFail($id);
++    return view('authenticated.bulletinboard.post_detail', compact('post'));
++}
++
+ }

@@ -143,11 +143,4 @@ class PostsController extends Controller
 
         return response()->json();
     }
-
-    public function postDetail($id)
-{
-    $post = Post::with(['user', 'postComments'])->findOrFail($id);
-    return view('authenticated.bulletinboard.post_detail', compact('post'));
-}
-
 }

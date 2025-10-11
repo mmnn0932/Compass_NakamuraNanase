@@ -28,19 +28,17 @@
       <div class=""><a href="{{ route('post.input') }}">投稿</a></div>
       <div class="">
       <input type="text" placeholder="キーワードを検索" name="keyword" value="{{ request('keyword') }}" form="postSearchRequest">
-      <input type="submit" value="検索" form="postSearchRequest"  >
+      <input type="submit" value="検索" form="postSearchRequest">
       </div>
       <input type="submit" name="like_posts" class="category_btn" value="いいねした投稿" form="postSearchRequest">
       <input type="submit" name="my_posts" class="category_btn" value="自分の投稿" form="postSearchRequest">
-    </form>
-
     <ul>
       @foreach($categories as $main)
-      <li class="font-weight-bold">{{ $main->main_category }}</li>
+      <li class="font-weight-bold">{{ $main->main_category }}
         @if($main->subCategories->isNotEmpty())
-    <ul>
+        <ul style="margin-left: 10px;">
       @foreach($main->subCategories as $sub)
-      <li style="margin-left: 10px;">
+      <li>
         <button
           type="submit"
           name="sub_category_id"
@@ -53,8 +51,9 @@
       </ul>
       @endif
       </li>
-      @endforeach
-    </ul>
+        @endforeach
+      </ul>
+    </div>
   </div>
   <form action="{{ route('post.show') }}" method="get" id="postSearchRequest"></form>
 </div>

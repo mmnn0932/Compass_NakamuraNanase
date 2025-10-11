@@ -19,35 +19,56 @@ use App\Http\Requests\BulletinBoard\PostEditRequest;
 
 class PostsController extends Controller
 {
-    public function show(Request $request){
-        $posts = Post::with(['user'])->withCount([
-        'postComments as comments_count',
-        'likes as likes_count',])->get();
-        $categories = MainCategory::get();
-        $like = new Like;
-        $post_comment = new Post;
-        if(!empty($request->keyword)){
-            $posts = Post::with('user', 'postComments')
-            ->where('post_title', 'like', '%'.$request->keyword.'%')
-            ->orWhere('post', 'like', '%'.$request->keyword.'%')->get();
-        }else if($request->category_word){
-            $sub_category = $request->category_word;
-            $posts = Post::with('user', 'postComments')->get();
-        }else if($request->like_posts){
-            $likes = Auth::user()->likePostId()->get('like_post_id');
-            $posts = Post::with('user', 'postComments')
-            ->whereIn('id', $likes)->get();
-        }else if($request->my_posts){
-            $posts = Post::with('user', 'postComments')
-            ->where('user_id', Auth::id())->get();
+    public function show(Request $request)
+{
+    // サイドバー用（メインカテゴリごとにサブカテゴリを持たせる）
+    $categories = MainCategory::with('subCategories')->get();
+
+    // 基本クエリ（一覧で使う共通の見た目：ユーザーと件数を抱えた状態）
+    $base = Post::with('user')
+        ->withCount(['postComments as comments_count', 'likes as likes_count']);
+
+    // ①サブカテゴリID指定（サイドバークリック時）
+    if ($request->filled('sub_category_id')) {
+        $subId = (int) $request->input('sub_category_id');
+        $posts = (clone $base)
+            ->whereHas('subCategories', fn($q) => $q->where('sub_categories.id', $subId))
+            ->get();
+
+    // ②キーワード：サブカテゴリ名と完全一致 → そのサブカテゴリの投稿だけ
+    } elseif ($request->filled('keyword')) {
+        $kw = trim($request->input('keyword'));
+
+        $exactSub = \App\Models\Categories\SubCategory::where('sub_category', $kw)->first();
+        if ($exactSub) {
+            $posts = (clone $base)
+                ->whereHas('subCategories', fn($q) => $q->where('sub_categories.id', $exactSub->id))
+                ->get();
+        } else {
+            // 一致しなければ通常のタイトル/本文検索
+            $posts = (clone $base)
+                ->where(function ($q) use ($kw) {
+                    $q->where('post_title', 'like', "%{$kw}%")
+                      ->orWhere('post', 'like', "%{$kw}%");
+                })
+                ->get();
         }
-        return view('authenticated.bulletinboard.posts', compact('posts', 'categories', 'like', 'post_comment'));
+
+    // ③「いいねした投稿」「自分の投稿」など他のボタン
+    } elseif ($request->has('like_posts')) {
+        $likes = auth()->user()->likePostId()->pluck('like_post_id');
+        $posts = (clone $base)->whereIn('id', $likes)->get();
+
+    } elseif ($request->has('my_posts')) {
+        $posts = (clone $base)->where('user_id', auth()->id())->get();
+
+    } else {
+        // デフォルト：全件
+        $posts = (clone $base)->get();
     }
 
-    public function postDetail($post_id){
-        $post = Post::with('user', 'postComments')->findOrFail($post_id);
-        return view('authenticated.bulletinboard.post_detail', compact('post'));
-    }
+    return view('authenticated.bulletinboard.posts', compact('posts', 'categories'));
+}
 
     public function postInput(){
         $main_categories = MainCategory::with('subCategories')->get();
@@ -143,4 +164,11 @@ class PostsController extends Controller
 
         return response()->json();
     }
+
+    public function postDetail($id)
+{
+    $post = Post::with(['user', 'postComments'])->findOrFail($id);
+    return view('authenticated.bulletinboard.post_detail', compact('post'));
+}
+
 }

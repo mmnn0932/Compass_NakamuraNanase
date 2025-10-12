@@ -7,9 +7,9 @@
       @enderror
       <p class="mb-0">カテゴリー</p>
       <select class="w-100" form="postCreate" name="post_category_id">
-        <option value="" disabled {{ old('post_category_id') ? '' : 'selected' }}>---</option>
         @foreach($main_categories as $main_category)
         <optgroup label="{{ $main_category->main_category }}">
+        <option value="" disabled {{ old('post_category_id') ? '' : 'selected' }}>---</option>
         <!-- サブカテゴリー表示 -->
         @foreach($main_category->subCategories as $sub)
           <option value="{{ $sub->id }}"

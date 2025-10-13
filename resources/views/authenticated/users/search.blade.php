@@ -92,6 +92,18 @@
           </div>
           <div class="selected_engineer">
             <label>選択科目</label>
+            <div>
+              @php($selectedSubjects = (array)request('subjects', []))
+              @foreach($subjects as $subject)
+                <label style="display:block;">
+                  <input
+                    type="checkbox"
+                    name="subjects[]"
+                    value="{{ $subject->id }}"form="userSearchRequest"
+                    {{ in_array($subject->id, $selectedSubjects) ? 'checked' : '' }}>
+                  {{ $subject->subject }}
+                </label>
+              @endforeach
           </div>
         </div>
       </div>

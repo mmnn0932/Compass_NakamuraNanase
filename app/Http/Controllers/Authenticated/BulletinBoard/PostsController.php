@@ -20,30 +20,46 @@ use App\Http\Requests\BulletinBoard\PostEditRequest;
 class PostsController extends Controller
 {
     public function show(Request $request){
-        $posts = Post::with(['user'])->withCount([
-        'postComments as comments_count',
-        'likes as likes_count',])->get();
-        $categories = MainCategory::get();
+        $baseWith  = ['user','postComments'];
+        $withCount = ['postComments as comments_count','likes as likes_count'];
+        $posts = Post::with($baseWith)->withCount($withCount)->latest()->get();
+        $categories   = MainCategory::with('subCategories')->get();
         $like = new Like;
         $post_comment = new Post;
-        if(!empty($request->keyword)){
-            $posts = Post::with('user', 'postComments')
-            ->where('post_title', 'like', '%'.$request->keyword.'%')
-            ->orWhere('post', 'like', '%'.$request->keyword.'%')->get();
+        if($request->filled('sub_category_id')) {
+        $val = $request->input('sub_category_id');
+
+        $posts = Post::with($baseWith)->withCount($withCount)
+        ->whereHas('subCategories', function ($q) use ($val) {
+                if (is_numeric($val)) {
+                    $q->where('sub_categories.id', (int)$val);
+                }
+            })
+            ->latest()->get();
+         } else if(!empty($request->keyword)){
+            $keyword = trim((string)$request->keyword);
+            $posts = Post::with($baseWith)->withCount($withCount)
+            ->where(function ($q) use ($keyword) {
+            $q->where('post_title', 'like', '%'.$keyword.'%')
+            ->orWhere('post', 'like', '%'.$keyword.'%')
+            ->orWhereRelation('subCategories','sub_category', $keyword);
+            })
+            ->latest()->get();
         }else if($request->category_word){
             $sub_category = $request->category_word;
             $posts = Post::with('user', 'postComments')->get();
         }else if($request->like_posts){
-            $likes = Auth::user()->likePostId()->get('like_post_id');
-            $posts = Post::with('user', 'postComments')
-            ->whereIn('id', $likes)->get();
+            $likedPostIds = Auth::user()->likePostId()->pluck('like_post_id');
+            $posts = Post::with($baseWith)->withCount($withCount)
+            ->whereIn('id', $likedPostIds)
+            ->latest()->get();
         }else if($request->my_posts){
-            $posts = Post::with('user', 'postComments')
-            ->where('user_id', Auth::id())->get();
+            $posts = Post::with($baseWith)->withCount($withCount)
+            ->where('user_id', Auth::id())
+            ->latest()->get();
         }
         return view('authenticated.bulletinboard.posts', compact('posts', 'categories', 'like', 'post_comment'));
     }
-
     public function postDetail($post_id){
         $post = Post::with('user', 'postComments')->findOrFail($post_id);
         return view('authenticated.bulletinboard.post_detail', compact('post'));

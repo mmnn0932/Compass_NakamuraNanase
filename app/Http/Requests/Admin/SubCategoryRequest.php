@@ -33,7 +33,7 @@ class SubCategoryRequest extends FormRequest
     {
         return [
             'main_category_id.required'   => 'メインカテゴリーは必ず選択してください。',
-            'sub_category_name.required'  => 'サブカテゴリー名は必須です。',
+            'sub_category_name.required'  => 'サブカテゴリーは必ず入力してください。',
             'sub_category_name.string'    => 'サブカテゴリー名は文字列で入力してください。',
             'sub_category_name.max'       => 'サブカテゴリー名は100文字以内で入力してください。',
             'sub_category_name.unique'   => '同じ名前のサブカテゴリーは登録できません。',

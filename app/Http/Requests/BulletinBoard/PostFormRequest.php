@@ -32,7 +32,7 @@ class PostFormRequest extends FormRequest
 
     public function messages(){
         return [
-            'post_category_id.required' => 'カテゴリーを選択してください。',
+            'post_category_id.required' => 'カテゴリーは必ず選択してください。',
             'post_title.required' => 'タイトルは必ず入力してください。',
             'post_title.string' => 'タイトルは文字列で入力してください。',
             'post_title.max' => 'タイトルは100文字以内で入力してください。',

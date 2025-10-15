@@ -32,7 +32,7 @@ class SubCategoryRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'main_category_id.required'   => 'メインカテゴリーは必ず入力してください。',
+            'main_category_id.required'   => 'メインカテゴリーは必ず選択してください。',
             'sub_category_name.required'  => 'サブカテゴリー名は必須です。',
             'sub_category_name.string'    => 'サブカテゴリー名は文字列で入力してください。',
             'sub_category_name.max'       => 'サブカテゴリー名は100文字以内で入力してください。',

@@ -7,32 +7,29 @@ class SelectNameDetails implements DisplayUsers{
 
   // 改修課題：選択科目の検索機能
   public function resultUsers($keyword, $category, $updown, $gender, $role, $subjects){
-    if(is_null($gender)){
-      $gender = ['1', '2', '3'];
-    }else{
-      $gender = array($gender);
-    }
-    if(is_null($role)){
-      $role = ['1', '2', '3', '4'];
-    }else{
-      $role = array($role);
-    }
-    $users = User::with('subjects')
-    ->where(function($q) use ($keyword){
-      $q->Where('over_name', 'like', '%'.$keyword.'%')
-      ->orWhere('under_name', 'like', '%'.$keyword.'%')
-      ->orWhere('over_name_kana', 'like', '%'.$keyword.'%')
-      ->orWhere('under_name_kana', 'like', '%'.$keyword.'%');
-    })
-    ->where(function($q) use ($role, $gender){
-      $q->whereIn('sex', $gender)
-      ->whereIn('role', $role);
-    })
-    ->whereHas('subjects', function($q) use ($subjects){
-      $q->whereIn('subjects.id', $subjects);
-    })
-    ->orderBy('over_name_kana', $updown)->get();
-    return $users;
-  }
+    $gender = empty($gender) ? ['1','2','3'] : (array)$gender;
+    $role = empty($role) ? ['1','2','3','4'] : (array)$role;
+    $subjects = (array)$subjects;
+    $updown = strtoupper($updown ?? 'ASC');
+    $updown = in_array($updown, ['ASC','DESC'], true) ? $updown : 'ASC';
 
-}
+    return User::with('subjects')
+      ->when($keyword !== null && $keyword !== '', function ($q) use ($keyword){
+      $q->where(function ($qq) use ($keyword) {
+      $qq->where('over_name', 'like', "%{$keyword}%")
+      ->orWhere('under_name', 'like', "%{$keyword}%")
+      ->orWhere('over_name_kana', 'like', "%{$keyword}%")
+      ->orWhere('under_name_kana', 'like', "%{$keyword}%");
+        });
+      })
+      ->whereIn('sex',  $gender)
+      ->whereIn('role', $role)
+      ->when(!empty($subjects), function ($q) use ($subjects) {
+      $q->whereHas('subjects', function ($qq) use ($subjects) {
+      $qq->whereIn('subjects.id', $subjects);
+        });
+      })
+      ->orderBy('id', $updown)
+      ->get();
+    }
+  }

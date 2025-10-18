@@ -109,8 +109,8 @@
         </div>
       </div>
       <div>
-        <input type="reset" value="リセット" form="userSearchRequest">
-      </div>
+  <a href="{{ route('user.show') }}" class="btn btn-light">リセット</a>
+</div>
       <div>
         <input type="submit" name="search_btn" value="検索" form="userSearchRequest">
       </div>

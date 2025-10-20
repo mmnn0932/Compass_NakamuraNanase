@@ -15,7 +15,7 @@ class SelectIds implements DisplayUsers{
     $q->where('id', 'like', "%{$keyword}%");
     })
     ->when(!empty($gender), fn($q) => $q->whereIn('sex', (array)$gender))
-    ->when(!empty($role),   fn($q) => $q->whereIn('role', (array)$role))
+    ->when(!empty($role), fn($q) => $q->whereIn('role', (array)$role))
     ->orderByRaw('CAST(users.id AS UNSIGNED) ' . ($updown === 'DESC' ? 'DESC' : 'ASC'))
     ->get();
     return $users;

@@ -1,7 +1,7 @@
 <?php
 namespace App\Calendars\Admin;
 use Carbon\Carbon;
-use App\Models\Users\User;
+use App\Models\Calendars\ReserveSettings;
 
 class CalendarView{
   private $carbon;
@@ -32,20 +32,46 @@ class CalendarView{
     $html[] = '<tbody>';
 
     $weeks = $this->getWeeks();
-
     foreach($weeks as $week){
       $html[] = '<tr class="'.$week->getClassName().'">';
       $days = $week->getDays();
       foreach($days as $day){
         $startDay = $this->carbon->format("Y-m-01");
         $toDay = $this->carbon->format("Y-m-d");
-        if($startDay <= $day->everyDay() && $toDay >= $day->everyDay()){
-          $html[] = '<td class="past-day border">';
+        $dayDateRaw = $day->everyDay();
+        $isValid    = !empty($dayDateRaw);
+        $dayDateStr = $isValid ? Carbon::parse($dayDateRaw)->format('Y-m-d') : '';
+        $isPast  = $isValid && ($dayDateStr >= $startDay) && ($dayDateStr <= $toDay);
+        if ($isPast) {
+          $html[] = '<td class="past-day border '.$day->getClassName().'">';
         }else{
           $html[] = '<td class="border '.$day->getClassName().'">';
         }
         $html[] = $day->render();
-        $html[] = $day->dayPartCounts($day->everyDay());
+        if(!$isValid) {
+          $html[] = '</td>';
+          continue;
+        }
+        for ($p = 1; $p <= 3; $p++) {
+          $label = ($p === 1 ? '1部' : ($p === 2 ? '2部' : '3部'));
+          $rs = ReserveSettings::withCount('users')
+            ->where('setting_reserve', $dayDateStr)
+            ->where('setting_part', $p)
+            ->first();
+          if ($rs) {
+          $reserved = (int)$rs->users_count;
+          } else {
+          $reserved = 0;
+          }
+          $url = route('calendar.admin.detail', [
+            'date' => $dayDateStr,
+            'part' => $p
+          ]);
+          $html[] = '<div style="font-size:12px;">'
+            . '<a href="'.$url.'">'.$label.'</a> '
+            . '<span class="text-body">'.$reserved.'</span>'
+            . '</div>';
+        }
         $html[] = '</td>';
       }
       $html[] = '</tr>';

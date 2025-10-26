@@ -14,20 +14,32 @@
               @enderror
             </div>
           @endif
+    <div class="detail_head">
+      <div class="detail-tags">
+      @if($post->subCategories->isNotEmpty())
+        @foreach($post->subCategories as $sub)
+          <span class="tag-chip">{{ $sub->sub_category }}</span>
+        @endforeach
+      @endif
+    </div>
         <div class="detail_inner_head">
           <div>
           </div>
-          <div>
-            <span class="edit-modal-open" post_title="{{ $post->post_title }}" post_body="{{ $post->post }}" post_id="{{ $post->id }}">編集</span>
+          <div class="modal-actions text-right detail-actions">
+            <button
+              type="button"
+              class="btn btn-primary edit-modal-open"
+              post_title="{{ $post->post_title }}"
+              post_body="{{ $post->post }}"
+              post_id="{{ $post->id }}"
+            >編集</button>
             <a href="{{ route('post.delete', ['id' => $post->id]) }}"
-            class="text-primary"
-            onclick="return confirm('削除してよろしいですか？');">
-            削除
-            </a>
+         class="btn btn-danger"
+         onclick="return confirm('削除してよろしいですか？');">削除</a>
+    </div>
+  </div>
+@endif
           </div>
-          @endif
-          </div>
-
         <div class="contributor d-flex">
           <p>
             <span>{{ $post->user->over_name }}</span>
@@ -56,7 +68,7 @@
     </div>
   </div>
   <div class="w-50 p-3">
-    <div class="comment_container border m-5">
+    <div class="comment_container m-5">
       <div class="comment_area p-3">
         @error('comment')
         <span class="error_message">{{ $message }}</span>

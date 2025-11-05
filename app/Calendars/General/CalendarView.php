@@ -41,12 +41,12 @@ class CalendarView{
       $dayCarbon  = $isValid ? Carbon::parse($dayDateStr, config('app.timezone'))->startOfDay() : null;
       $today      = Carbon::today(config('app.timezone'));
       $isPast     = $dayCarbon && $dayCarbon->lt($today);
-      if ($isPast) {
-          $html[] = '<td class="calendar-td past-day">';
-        }else{
-          $html[] = '<td class="calendar-td '.$day->getClassName().'">';
-        }
-        $html[] = $day->render();
+        $tdClass = 'calendar-td ' . $day->getClassName() . ($isPast ? ' past-day' : '');
+        $html[]  = '<td class="'.$tdClass.'">';
+        $html[] = '<div class="cell-inner">';
+        $html[] =   '<div class="cell-date">'.$day->render().'</div>';
+        $html[] =   '<div class="cell-body">';
+
 
         $hasMyReserve = in_array($dayDateStr, $day->authReserveDay(), true);
 
@@ -71,13 +71,15 @@ class CalendarView{
           }
         }else{
         if ($isPast) {
-          $html[] = '<p class="m-auto p-0 w-75" style="font-size:12px; color:#212529;">受付終了</p>';
+          $html[] = '<p class="m-auto p-0 w-75 closed-label">受付終了</p>';
           $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
         }else{
           $html[] = $day->selectPart($dayDateStr);
         }
         }
-        $html[] = $day->getDate();
+        $html[] =   '</div>';
+        $html[] = '</div>';
+        //$html[] = $day->getDate();
         $html[] = '</td>';
       }
       $html[] = '</tr>';

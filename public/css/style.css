@@ -1087,3 +1087,16 @@ li {
 .subject_edit_btn .chev.is-open {
   transform: rotate(180deg);
 }
+
+.closed-label {
+  font-size: 14px;
+  color: #212529;
+}
+
+.calendar .calendar-table td .cell-date {
+  margin-bottom: 10px;
+}
+
+.calendar .calendar-table td .cell-body {
+  justify-items: center;
+}

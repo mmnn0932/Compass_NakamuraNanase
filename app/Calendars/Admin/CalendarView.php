@@ -16,17 +16,17 @@ class CalendarView{
 
   public function render(){
     $html = [];
-    $html[] = '<div class="calendar text-center">';
-    $html[] = '<table class="table m-auto border">';
+    $html[] = '<div class="calendar text-center admin-cal">';
+    $html[] = '<table class="table calendar-table">';
     $html[] = '<thead>';
     $html[] = '<tr>';
-    $html[] = '<th class="border">月</th>';
-    $html[] = '<th class="border">火</th>';
-    $html[] = '<th class="border">水</th>';
-    $html[] = '<th class="border">木</th>';
-    $html[] = '<th class="border">金</th>';
-    $html[] = '<th class="border">土</th>';
-    $html[] = '<th class="border">日</th>';
+    $html[] = '<th>月</th>';
+    $html[] = '<th>火</th>';
+    $html[] = '<th>水</th>';
+    $html[] = '<th>木</th>';
+    $html[] = '<th>金</th>';
+    $html[] = '<th>土</th>';
+    $html[] = '<th>日</th>';
     $html[] = '</tr>';
     $html[] = '</thead>';
     $html[] = '<tbody>';
@@ -36,16 +36,15 @@ class CalendarView{
       $html[] = '<tr class="'.$week->getClassName().'">';
       $days = $week->getDays();
       foreach($days as $day){
-        $startDay = $this->carbon->format("Y-m-01");
-        $toDay = $this->carbon->format("Y-m-d");
         $dayDateRaw = $day->everyDay();
         $isValid    = !empty($dayDateRaw);
-        $dayDateStr = $isValid ? Carbon::parse($dayDateRaw)->format('Y-m-d') : '';
-        $isPast  = $isValid && ($dayDateStr >= $startDay) && ($dayDateStr <= $toDay);
+        $dayDateStr = $isValid ? Carbon::parse($dayDateRaw, config('app.timezone'))->format('Y-m-d') : '';
+        $today      = Carbon::today(config('app.timezone'))->format('Y-m-d');
+        $isPast     = $isValid && ($dayDateStr < $today);
         if ($isPast) {
-          $html[] = '<td class="past-day border '.$day->getClassName().'">';
+          $html[] = '<td class="calendar-td past-day '.$day->getClassName().'">';
         }else{
-          $html[] = '<td class="border '.$day->getClassName().'">';
+          $html[] = '<td class="calendar-td '.$day->getClassName().'">';
         }
         $html[] = $day->render();
         if(!$isValid) {
@@ -68,8 +67,8 @@ class CalendarView{
             'part' => $p
           ]);
           $html[] = '<div style="font-size:12px;">'
-            . '<a href="'.$url.'">'.$label.'</a> '
-            . '<span class="text-body">'.$reserved.'</span>'
+            . '<a href="'.$url.'">'.$label.'</a>'
+            . '<span class="text-body" style="margin-left:30px;">'.$reserved.'</span>'
             . '</div>';
         }
         $html[] = '</td>';

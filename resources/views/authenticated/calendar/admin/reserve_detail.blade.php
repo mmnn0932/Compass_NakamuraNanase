@@ -1,38 +1,46 @@
 <x-sidebar>
-<div class="vh-100 d-flex" style="align-items:center; justify-content:center;">
-  <div class="w-50 m-auto h-75">
-      <p class="mb-3">
-        <span class="ml-2">{{ $date }}</span>
-        <span class="ml-2">{{ [1=>'1部',2=>'2部',3=>'3部'][(int)$part]}}</span>
-      </p>
-
-    @php
+  <div class="vh-100 d-flex align-items-start justify-content-center">
+    <div class="w-100 pt-3 px-3">
+      <div class="w-75 reserve-offset">
+    <p class="detail-title mb-2">
+    {{ \Carbon\Carbon::parse($date)->format('Y年n月j日') }}
+    <span class="ml-3">{{ [1=>'1部',2=>'2部',3=>'3部'][(int)$part] }}</span>
+    </p>
+      @php
       $setting = $reservePersons->first();
-      $users   = $setting ? $setting->users : collect();
-    @endphp
+      $users = $setting ? $setting->users : collect();
+      @endphp
+      <div class="detail-card">
+      <div class="table-responsive">
+      <table class="table reserve-table reserve-table--compact mb-0">
+      <caption class="sr-only">
+      {{ \Carbon\Carbon::parse($date)->format('Y年n月j日') }}
+      {{ [1=>'1部',2=>'2部',3=>'3部'][(int)$part] }}
+      </caption>
 
-    <div class="h-75 border">
-      <table class="">
+
+
+
       <thead class="text-center">
         <tr>
-          <th class="w-25">ID</th>
-          <th class="w-25">名前</th>
-          <th class="w-25">場所</th>
+          <th class="col-id">ID</th>
+          <th class="col-name">名前</th>
+          <th class="col-place">場所</th>
         </tr>
       </thead>
-      @if($users->isNotEmpty())
-        <tbody class="text-center">
-        @foreach($users as $user)
-        <tr>
+      <tbody class="text-center">
+        @forelse($users as $user)
+      <tr>
           <td>{{ $user->id }}</td>
           <td>{{ $user->over_name }} {{ $user->under_name }}</td>
           <td>リモート</td>
         </tr>
-      @endforeach
+      @empty
+       @endforelse
         </tbody>
-      @endif
       </table>
     </div>
   </div>
+</div>
 </div>
 </x-sidebar>

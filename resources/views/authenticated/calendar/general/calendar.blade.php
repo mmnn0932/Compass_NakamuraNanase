@@ -1,14 +1,12 @@
 <x-sidebar>
-<div class="vh-100 pt-5" style="background:#ECF1F6;">
-  <div class="border w-75 m-auto pt-5 pb-5" style="border-radius:5px; background:#FFF;">
-    <div class="w-75 m-auto border" style="border-radius:5px;">
+ <div class="vh-100 pt-5" style="background:#ECF1F6;">
+  <div class="profile-card calendar-shell calendar-fit reserve-mode w-75 m-auto">
 
-      <p class="text-center">{{ $calendar->getTitle() }}</p>
-      <div class="">
+      <p class="text-center mb-2">{{ $calendar->getTitle() }}</p>
+      <div class="calendar-wrap">
         {!! $calendar->render() !!}
       </div>
-    </div>
-    <div class="text-right w-75 m-auto">
+    <div class="text-right mt-2">
       <input type="submit" class="btn btn-primary" value="予約する" form="reserveParts">
     </div>
   </div>

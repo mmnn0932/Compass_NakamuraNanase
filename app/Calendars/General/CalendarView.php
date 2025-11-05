@@ -18,7 +18,7 @@ class CalendarView{
   public function render(){
     $html = [];
     $html[] = '<div class="calendar text-center">';
-    $html[] = '<table class="table">';
+    $html[] = '<table class="table calendar-table">';
     $html[] = '<thead>';
     $html[] = '<tr>';
     $html[] = '<th>月</th>';
@@ -36,12 +36,11 @@ class CalendarView{
       $html[] = '<tr class="'.$week->getClassName().'">';
       $days = $week->getDays();
       foreach($days as $day){
-      $startDay   = $this->carbon->format('Y-m-01');
-      $toDay      = Carbon::today(config('app.timezone'))->format('Y-m-d');
       $dayDateStr = $day->everyDay();
       $isValid    = !empty($dayDateStr);
-      $dayDateStr = $isValid ? Carbon::parse($dayDateStr)->format('Y-m-d') : '';
-      $isPast     = $isValid && ($dayDateStr >= $startDay) && ($dayDateStr <= $toDay);
+      $dayCarbon  = $isValid ? Carbon::parse($dayDateStr, config('app.timezone'))->startOfDay() : null;
+      $today      = Carbon::today(config('app.timezone'));
+      $isPast     = $dayCarbon && $dayCarbon->lt($today);
       if ($isPast) {
           $html[] = '<td class="calendar-td past-day">';
         }else{

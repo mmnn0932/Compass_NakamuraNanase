@@ -71,7 +71,7 @@ class CalendarWeekDay{
    }
 
    function getDate(){
-     return '<input type="hidden" value="'. $this->carbon->format('Y-m-d') .'" name="getData[]" form="reserveParts">';
+     return '<input type="hidden" value="'. $this->carbon->format('Y-m-d') .'" name="getDate[]" form="reserveParts">';
    }
 
    function everyDay(){

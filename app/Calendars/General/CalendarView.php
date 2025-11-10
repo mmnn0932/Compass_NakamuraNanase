@@ -59,27 +59,23 @@ class CalendarView{
         else                         $reserveLabel = 'リモ';
 
         if ($isPast) {
-          $html[] = '<p class="m-auto p-0 w-75" style="font-size:12px">'.$reserveLabel . '</p>';
-          $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
+          $html[] = '<p class="m-auto p-0 w-75" style="font-size:14px">'.$reserveLabel . '</p>';
         } else {
           $html[] = '<button type="button" class="btn btn-danger p-0 w-75 js-open-cancel" ' .
               'data-date="' . $reserve->setting_reserve . '" ' .
               'data-part="' . $reserve->setting_part . '" ' .
               'style="font-size:12px">' . $reserveLabel . '</button>';
-
-          $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
           }
         }else{
         if ($isPast) {
           $html[] = '<p class="m-auto p-0 w-75 closed-label">受付終了</p>';
-          $html[] = '<input type="hidden" name="getPart[]" value="" form="reserveParts">';
         }else{
           $html[] = $day->selectPart($dayDateStr);
+          $html[] = $day->getDate();
         }
         }
         $html[] =   '</div>';
         $html[] = '</div>';
-        //$html[] = $day->getDate();
         $html[] = '</td>';
       }
       $html[] = '</tr>';

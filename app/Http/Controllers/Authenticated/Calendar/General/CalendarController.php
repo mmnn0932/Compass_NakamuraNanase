@@ -20,14 +20,26 @@ class CalendarController extends Controller
 
     public function reserve(Request $request){
         DB::beginTransaction();
-        try{
-            $getPart = $request->getPart;
-            $getDate = $request->getData;
-            $reserveDays = array_filter(array_combine($getDate, $getPart));
-            foreach($reserveDays as $key => $value){
-                $reserve_settings = ReserveSettings::where('setting_reserve', $key)->where('setting_part', $value)->first();
-                $reserve_settings->decrement('limit_users');
-                $reserve_settings->users()->attach(Auth::id());
+        try {
+            $getPart = (array) $request->input('getPart', []);
+            $getDate = (array) $request->input('getDate', []);
+
+            foreach ($getPart as $i => $part) {
+                if (!$part) continue;
+                $date = $getDate[$i] ?? null;
+                if (!$date) continue;
+
+                $rs = ReserveSettings::where('setting_reserve', $date)
+                    ->where('setting_part', $part)
+                    ->first();
+                if (!$rs) continue;
+                if ($rs->limit_users <= 0) continue;
+
+                $already = $rs->users()->where('users.id', \Auth::id())->exists();
+                if ($already) continue;
+
+                $rs->decrement('limit_users');
+                $rs->users()->attach(\Auth::id());
             }
             DB::commit();
         }catch(\Exception $e){
